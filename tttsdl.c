@@ -1,10 +1,14 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_pixels.h>
+#include <SDL2/SDL_surface.h>
+#include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 
 int variables[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -16,6 +20,8 @@ char winner;
 
 SDL_Window *window;
 SDL_Renderer *renderer;
+SDL_Texture *label;
+TTF_Font *font;
 
 SDL_Rect button[10] = {{170, 50, 75, 75}, {280, 50, 85, 75}, {410, 50, 75, 75}, {170, 170, 75, 75}, {280, 170, 85, 75}, {410, 170, 75, 75}, {170, 290, 75, 75}, {280, 290, 85, 75}, {410, 290, 75, 75}};
 SDL_Texture *texture[10];
@@ -29,6 +35,20 @@ int pos;
 int isDarkMode(bool darkmode){
   if (darkmode){return 1;}
   else{return 255;}
+}
+
+int verifyVictory(char pl[10]){
+  if ((pl[0] == pl[1]) && (pl[1] == pl[2]) && (pl[0] != space[0])) {winner = pl[0]; return 1;}
+  else if ((pl[3] == pl[4]) && (pl[4] == pl[5]) && (pl[3] != space[0])) {winner = pl[3];return 1;}
+  else if ((pl[6] == pl[7]) && (pl[7] == pl[8]) && (pl[6] != space[0])) {winner = pl[6];return 1;}
+  else if ((pl[0] == pl[3]) && (pl[3] == pl[6]) && (pl[6] != space[0])){winner = pl[6];return 1;}
+  else if ((pl[1] == pl[4]) && (pl[4] == pl[7]) && (pl[7] != space[0])){winner = pl[7];return 1;}
+  else if ((pl[2] == pl[5]) && (pl[5] == pl[8]) && (pl[8] != space[0])){winner = pl[8];return 1;}
+  else if ((pl[0] == pl[4]) && (pl[4] == pl[8]) && (pl[0] != space[0])){winner = pl[0];return 1;}
+  else if ((pl[2] == pl[4]) && (pl[4] == pl[6]) && (pl[2] != space[0])){winner = pl[2];return 1;}
+  else if ((pl[0] != space[0]) && (pl[1] != space[0]) && (pl[2] != space[0]) && (pl[3] != space[0]) && (pl[4] != space[0]) && (pl[5] != space[0]) && (pl[6] != space[0]) && (pl[7] != space[0]) && (pl[8] != space[0]))
+        {return 2;}
+  else{return 0;}
 }
 
 void gameUI(SDL_Renderer *renderer, int ModeScreen){
@@ -70,6 +90,21 @@ void gameUI(SDL_Renderer *renderer, int ModeScreen){
     }
   
   }
+  if((verifyVictory(plays) == 1) || (verifyVictory(plays) == 2)){
+    TTF_Init();
+    font = TTF_OpenFont("arial.ttf", 24);
+    char text[25];
+    sprintf(text, "Player %c is the Winner", winner);
+    if (verifyVictory(plays) == 2){sprintf(text, "Draw!");}
+    SDL_Color color = {ModeTable, ModeTable, ModeTable, ModeTable};
+    SDL_Surface *tmp = TTF_RenderText_Blended(font, text, color); 
+    SDL_Texture *tmpTex = SDL_CreateTextureFromSurface(renderer, tmp);
+    SDL_Rect textRect = {200, 400, tmp->w, tmp->h};
+    SDL_RenderCopy(renderer, tmpTex, NULL, &textRect);
+    SDL_FreeSurface(tmp);
+    SDL_DestroyTexture(tmpTex);
+    TTF_Quit();
+  }
 
   SDL_RenderPresent(renderer);
 }
@@ -79,24 +114,12 @@ static int regionMatch(const SDL_Rect *rect, int x, int y){
   return ((x>=rect->x) && (x <= rect->x + rect->w) && (y >= rect->y ) && (y <= rect->y + rect->h));
 }
 
-int verifyVictory(char pl[10]){
-  if ((pl[0] == pl[1]) && (pl[1] == pl[2]) && (pl[0] != space[0])) {winner = pl[0]; return 1;}
-  else if ((pl[3] == pl[4]) && (pl[4] == pl[5]) && (pl[3] != space[0])) {winner = pl[3];return 1;}
-  else if ((pl[6] == pl[7]) && (pl[7] == pl[8]) && (pl[6] != space[0])) {winner = pl[6];return 1;}
-  else if ((pl[0] == pl[3]) && (pl[3] == pl[6]) && (pl[6] != space[0])){winner = pl[6];return 1;}
-  else if ((pl[1] == pl[4]) && (pl[4] == pl[7]) && (pl[7] != space[0])){winner = pl[7];return 1;}
-  else if ((pl[2] == pl[5]) && (pl[5] == pl[8]) && (pl[8] != space[0])){winner = pl[8];return 1;}
-  else if ((pl[0] == pl[4]) && (pl[4] == pl[8]) && (pl[0] != space[0])){winner = pl[0];return 1;}
-  else if ((pl[2] == pl[4]) && (pl[4] == pl[6]) && (pl[2] != space[0])){winner = pl[2];return 1;}
-  else if ((pl[0] != space[0]) && (pl[1] != space[0]) && (pl[2] != space[0]) && (pl[3] != space[0]) && (pl[4] != space[0]) && (pl[5] != space[0]) && (pl[6] != space[0]) && (pl[7] != space[0]) && (pl[8] != space[0]))
-        {return 2;}
-  else{return 0;}
-}
 void windowLoop(SDL_Window *window, SDL_Renderer *renderer){
   int x, y;
   int done = 0;
   SDL_Event event;
   while(!done){
+    
     while(SDL_PollEvent(&event)){
       switch(event.type){
         case SDL_WINDOWEVENT_CLOSE:
@@ -125,15 +148,17 @@ void windowLoop(SDL_Window *window, SDL_Renderer *renderer){
       }
     }
   gameUI(renderer, isDarkMode(darkmode));
+
   if (verifyVictory(plays) == 1){
-    printf("Vitória do jogador %c\n", winner);
     gameUI(renderer, isDarkMode(darkmode));
-    SDL_Delay(2000);
-    break;}
-  if (verifyVictory(plays) == 2){printf("Empate!\n");
+    SDL_Delay(3000);
+    break;
+    }
+  if (verifyVictory(plays) == 2){
     gameUI(renderer, isDarkMode(darkmode));
-    SDL_Delay(2000);
-    break;}
+    SDL_Delay(3000);
+    break;
+  }
   }
   SDL_DestroyWindow(window);
 SDL_DestroyRenderer(renderer);
