@@ -12,15 +12,8 @@ int variables[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 SDL_Window *window;
 SDL_Renderer *renderer;
 
-SDL_Rect button0 = {170, 50, 75, 75};
-SDL_Rect button1 = {280, 50, 85, 75};
-SDL_Rect button2 = {410, 50, 75, 75};
-SDL_Rect button3 = {170, 170, 75, 75};
-SDL_Rect button4 = {280, 170, 85, 75};
-SDL_Rect button5 = {410, 170, 75, 75};
-SDL_Rect button6 = {170, 290, 75, 75};
-SDL_Rect button7 = {280, 290, 85, 75};
-SDL_Rect button8 = {410, 290, 75, 75};
+SDL_Rect button[10] = {{170, 50, 75, 75}, {280, 50, 85, 75}, {410, 50, 75, 75}, {170, 170, 75, 75}, {280, 170, 85, 75}, {410, 170, 75, 75}, {170, 290, 75, 75}, {280, 290, 85, 75}, {410, 290, 75, 75}};
+
 
 bool darkmode = true;
 int ModeScreen, ModeTable;
@@ -48,15 +41,7 @@ void gameUI(SDL_Renderer *renderer, int ModeScreen){
   SDL_Rect vertical_rect_1 = {390, 50, 10, 300};
   SDL_RenderFillRect(renderer, &vertical_rect_1);
   SDL_SetRenderDrawColor(renderer, ModeScreen, ModeScreen, ModeScreen, ModeScreen);
-  SDL_RenderFillRect(renderer, &button0);
-  SDL_RenderFillRect(renderer, &button1);
-  SDL_RenderFillRect(renderer, &button2);
-  SDL_RenderFillRect(renderer, &button3);
-  SDL_RenderFillRect(renderer, &button4);
-  SDL_RenderFillRect(renderer, &button5);
-  SDL_RenderFillRect(renderer, &button6);
-  SDL_RenderFillRect(renderer, &button7);
-  SDL_RenderFillRect(renderer, &button8);
+  for (int i=0;i<9;i++){SDL_RenderFillRect(renderer, &button[i]);}
 
   SDL_SetRenderDrawColor(renderer, ModeTable, ModeTable, ModeTable, ModeTable);
 
@@ -66,35 +51,11 @@ void gameUI(SDL_Renderer *renderer, int ModeScreen){
     else{surface = IMG_Load("x.png");}
     SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
-    if(pos == 0){
-      SDL_QueryTexture(tex, NULL, NULL, &button0.w, &button0.h);
-      SDL_RenderCopy(renderer, tex, NULL, &button0);}
-
-    if (pos == 1){
-      SDL_QueryTexture(tex, NULL, NULL, &button1.w, &button1.h);
-      SDL_RenderCopy(renderer, tex, NULL, &button1);}
-    if (pos == 2){
-      SDL_QueryTexture(tex, NULL, NULL, &button2.w, &button2.h);
-      SDL_RenderCopy(renderer, tex, NULL, &button2);}
-    if (pos == 3){
-      SDL_QueryTexture(tex, NULL, NULL, &button3.w, &button3.h);
-      SDL_RenderCopy(renderer, tex, NULL, &button3);}
-    if (pos == 4){
-      SDL_QueryTexture(tex, NULL, NULL, &button4.w, &button4.h);
-      SDL_RenderCopy(renderer, tex, NULL, &button4);}
-    if (pos == 5){
-      SDL_QueryTexture(tex, NULL, NULL, &button5.w, &button5.h);
-      SDL_RenderCopy(renderer, tex, NULL, &button5);}
-    if (pos == 6){
-      SDL_QueryTexture(tex, NULL, NULL, &button6.w, &button6.h);
-      SDL_RenderCopy(renderer, tex, NULL, &button6);}
-    if (pos == 7){
-      SDL_QueryTexture(tex, NULL, NULL, &button7.w, &button7.h);
-      SDL_RenderCopy(renderer, tex, NULL, &button7);}
-    if (pos == 8){
-      SDL_QueryTexture(tex, NULL, NULL, &button8.w, &button8.h);
-      SDL_RenderCopy(renderer, tex, NULL, &button8);}
-    
+    for (int i=0;i<9;i++){
+      if(pos == i){
+        SDL_QueryTexture(tex, NULL, NULL, &button[i].w, &button[i].h);
+        SDL_RenderCopy(renderer, tex, NULL, &button[i]);}
+    }
   }
   
 
@@ -125,52 +86,14 @@ void windowLoop(SDL_Window *window, SDL_Renderer *renderer){
       break;
     case SDL_MOUSEBUTTONDOWN:
         SDL_GetMouseState(&x, &y);
-        if ((regionMatch(&button0, x, y)) && variables[0] == 0){
+          
+        for (int i=0;i<9;i++){
+          if ((regionMatch(&button[i], x, y)) && variables[i] == 0){
             vez++;
-            pos = 0;
-            variables[0]++;
-          }
-        if ((regionMatch(&button1, x, y)) && variables[1] == 0){
-            vez++;
-            pos = 1;
-            variables[1]++;
-          }
-        if ((regionMatch(&button2, x, y)) && variables[2] == 0){
-            vez++;
-            pos = 2;
-            variables[2]++;
-          }
-        if ((regionMatch(&button3, x, y)) && variables[3] == 0){
-            vez++;
-            pos = 3;
-            variables[3]++;
-          }
-        if ((regionMatch(&button4, x, y)) && variables[4] == 0){
-            vez++;
-            pos = 4;
-            variables[4]++;
-          }
-        if ((regionMatch(&button5, x, y)) && variables[5] == 0){
-            vez++;
-            pos = 5;
-            variables[5]++;
-          }
-        if ((regionMatch(&button6, x, y)) && variables[6] == 0){
-            vez++;
-            pos = 6;
-            variables[6]++;
-          }
-        if ((regionMatch(&button7, x, y)) && variables[7] == 0){
-            vez++;
-            pos = 7;
-            variables[7]++;
-          }
-        if ((regionMatch(&button8, x, y)) && variables[8] == 0){
-            vez++;
-            pos = 8;
-            variables[8]++;
-          }
-
+            pos = i;
+            variables[i]++;
+            }
+        }
       break;
       }
     } 
