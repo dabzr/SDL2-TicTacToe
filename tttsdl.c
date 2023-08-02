@@ -8,12 +8,13 @@
 #include <stdbool.h>
 
 int variables[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+int hist[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 SDL_Window *window;
 SDL_Renderer *renderer;
 
 SDL_Rect button[10] = {{170, 50, 75, 75}, {280, 50, 85, 75}, {410, 50, 75, 75}, {170, 170, 75, 75}, {280, 170, 85, 75}, {410, 170, 75, 75}, {170, 290, 75, 75}, {280, 290, 85, 75}, {410, 290, 75, 75}};
-
+SDL_Texture *texture[10];
 
 bool darkmode = true;
 int ModeScreen, ModeTable;
@@ -49,15 +50,21 @@ void gameUI(SDL_Renderer *renderer, int ModeScreen){
     SDL_Surface* surface;
     if (vez%2 == 0){surface = IMG_Load("O.png");}
     else{surface = IMG_Load("x.png");}
-    SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surface);
+    texture[vez] = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
     for (int i=0;i<9;i++){
       if(pos == i){
-        SDL_QueryTexture(tex, NULL, NULL, &button[i].w, &button[i].h);
-        SDL_RenderCopy(renderer, tex, NULL, &button[i]);}
+        SDL_QueryTexture(texture[vez], NULL, NULL, &button[i].w, &button[i].h);
+        SDL_RenderCopy(renderer, texture[vez], NULL, &button[i]);}
+    }
+    if (vez>1){
+      for (int i=1;i<=vez;i++){
+        if (pos != hist[i]){
+        SDL_RenderCopy(renderer, texture[i], NULL, &button[hist[i]]);
+        }
+      }
     }
   }
-  
 
   SDL_RenderPresent(renderer);
 }
@@ -89,9 +96,10 @@ void windowLoop(SDL_Window *window, SDL_Renderer *renderer){
           
         for (int i=0;i<9;i++){
           if ((regionMatch(&button[i], x, y)) && variables[i] == 0){
-            vez++;
-            pos = i;
             variables[i]++;
+            vez++;
+            hist[vez]=i;
+            pos = i;
             }
         }
       break;
