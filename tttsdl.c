@@ -9,6 +9,10 @@
 
 int variables[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 int hist[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+char plays[10] = "         ";
+char XO[3] = "OX";
+char space[2] = " ";
+char winner;
 
 SDL_Window *window;
 SDL_Renderer *renderer;
@@ -64,6 +68,7 @@ void gameUI(SDL_Renderer *renderer, int ModeScreen){
         }
       }
     }
+  
   }
 
   SDL_RenderPresent(renderer);
@@ -74,6 +79,19 @@ static int regionMatch(const SDL_Rect *rect, int x, int y){
   return ((x>=rect->x) && (x <= rect->x + rect->w) && (y >= rect->y ) && (y <= rect->y + rect->h));
 }
 
+int verifyVictory(char pl[10]){
+  if ((pl[0] == pl[1]) && (pl[1] == pl[2]) && (pl[0] != space[0])) {winner = pl[0]; return 1;}
+  else if ((pl[3] == pl[4]) && (pl[4] == pl[5]) && (pl[3] != space[0])) {winner = pl[3];return 1;}
+  else if ((pl[6] == pl[7]) && (pl[7] == pl[8]) && (pl[6] != space[0])) {winner = pl[6];return 1;}
+  else if ((pl[0] == pl[3]) && (pl[3] == pl[6]) && (pl[6] != space[0])){winner = pl[6];return 1;}
+  else if ((pl[1] == pl[4]) && (pl[4] == pl[7]) && (pl[7] != space[0])){winner = pl[7];return 1;}
+  else if ((pl[2] == pl[5]) && (pl[5] == pl[8]) && (pl[8] != space[0])){winner = pl[8];return 1;}
+  else if ((pl[0] == pl[4]) && (pl[4] == pl[8]) && (pl[0] != space[0])){winner = pl[0];return 1;}
+  else if ((pl[2] == pl[4]) && (pl[4] == pl[6]) && (pl[2] != space[0])){winner = pl[2];return 1;}
+  else if ((pl[0] != space[0]) && (pl[1] != space[0]) && (pl[2] != space[0]) && (pl[3] != space[0]) && (pl[4] != space[0]) && (pl[5] != space[0]) && (pl[6] != space[0]) && (pl[7] != space[0]) && (pl[8] != space[0]))
+        {return 2;}
+  else{return 0;}
+}
 void windowLoop(SDL_Window *window, SDL_Renderer *renderer){
   int x, y;
   int done = 0;
@@ -100,12 +118,22 @@ void windowLoop(SDL_Window *window, SDL_Renderer *renderer){
             vez++;
             hist[vez]=i;
             pos = i;
-            }
+            plays[pos] = XO[vez%2];
+          }
         }
       break;
       }
-    } 
+    }
   gameUI(renderer, isDarkMode(darkmode));
+  if (verifyVictory(plays) == 1){
+    printf("Vitória do jogador %c\n", winner);
+    gameUI(renderer, isDarkMode(darkmode));
+    SDL_Delay(2000);
+    break;}
+  if (verifyVictory(plays) == 2){printf("Empate!\n");
+    gameUI(renderer, isDarkMode(darkmode));
+    SDL_Delay(2000);
+    break;}
   }
   SDL_DestroyWindow(window);
 SDL_DestroyRenderer(renderer);
