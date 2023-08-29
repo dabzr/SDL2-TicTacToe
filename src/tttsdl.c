@@ -72,8 +72,8 @@ void gameUI(SDL_Renderer *renderer, int ModeScreen){
 
   if (vez >= 1){
     SDL_Surface* surface;
-    if (vez%2 == 0){surface = IMG_Load("../png/O.png");}
-    else{surface = IMG_Load("../png/x.png");}
+    if (!(vez%2)) surface = IMG_Load("../png/O.png");
+    else surface = IMG_Load("../png/x.png");
     texture[vez] = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
     for (int i=0;i<9;i++){
@@ -83,9 +83,8 @@ void gameUI(SDL_Renderer *renderer, int ModeScreen){
     }
     if (vez>1){
       for (int i=1;i<=vez;i++){
-        if (pos != hist[i]){
+        if (pos != hist[i])
         SDL_RenderCopy(renderer, texture[i], NULL, &button[hist[i]]);
-        }
       }
     }
   
