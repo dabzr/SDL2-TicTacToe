@@ -72,8 +72,8 @@ void gameUI(SDL_Renderer *renderer, int ModeScreen){
 
   if (vez >= 1){
     SDL_Surface* surface;
-    if (!(vez%2)) surface = IMG_Load("../png/O.png");
-    else surface = IMG_Load("../png/x.png");
+    if (!(vez%2)) surface = IMG_Load("png/O.png");
+    else surface = IMG_Load("png/x.png");
     texture[vez] = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
     for (int i=0;i<9;i++){
@@ -91,7 +91,7 @@ void gameUI(SDL_Renderer *renderer, int ModeScreen){
   }
   if((verifyVictory(plays) == 1) || (verifyVictory(plays) == 2)){
     TTF_Init();
-    font = TTF_OpenFont("../fonts/arial.ttf", 24);
+    font = TTF_OpenFont("fonts/arial.ttf", 24);
     char text[25];
     sprintf(text, "Player %c is the Winner", winner);
     if (verifyVictory(plays) == 2){sprintf(text, "Draw!");}
