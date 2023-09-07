@@ -17,7 +17,7 @@ class Game{
     char plays[10] = "         ";
     char XO[3] = "OX";
     char winner;
-    int vez = 0, pos; 
+    unsigned vez = 0, pos; 
     
     SDL_Window *window;
     SDL_Renderer *renderer;
@@ -87,7 +87,7 @@ class Game{
       SDL_RenderFillRect(renderer, &table_rects[2]);
       SDL_RenderFillRect(renderer, &table_rects[3]);
 
-      if (vez >= 1){
+      if (vez){
         SDL_Surface* surface;
         if (!(vez%2)) surface = IMG_Load("png/O.png");
         else surface = IMG_Load("png/x.png");
