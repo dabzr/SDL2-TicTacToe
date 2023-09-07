@@ -1,82 +1,94 @@
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_pixels.h>
-#include <SDL2/SDL_surface.h>
 #include <SDL2/SDL_ttf.h>
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_mouse.h>
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_video.h>
 #include <SDL2/SDL_image.h>
 #include <iostream>
-#include <cstdlib>
 #include <array>
 
-class Game{
-  private:
-    std::array <int, 10> variables = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-    std::array <int, 10>hist = variables;
-    char plays[10] = "         ";
-    char XO[3] = "OX";
-    char winner;
-    unsigned vez = 0, pos; 
-    
-    SDL_Window *window;
-    SDL_Renderer *renderer;
-    SDL_Texture *label;
-    TTF_Font *font;
-    SDL_Color white = {255, 255, 255, 255};
-    SDL_Color black = {1, 1, 1, 1};
-    SDL_Texture *texture[10];
+class Game {
+private:
+  SDL_Window* window;
+  SDL_Renderer* renderer;
+  SDL_Texture* texture[10];
+  TTF_Font* font;
+  SDL_Color white = {255, 255, 255, 255};
+  SDL_Color black = {1, 1, 1, 1};
 
-    SDL_Rect button[10] = {
-    {170, 50, 75, 75}, {280, 50, 85, 75}, {410, 50, 75, 75}, 
-    {170, 170, 75, 75}, {280, 170, 85, 75}, {410, 170, 75, 75},
-    {170, 290, 75, 75}, {280, 290, 85, 75}, {410, 290, 75, 75}};
-    SDL_Rect table_rects[4]= {
-    {170, 140, 320, 10}, {170, 260, 320, 10} // Horizontal
-  , {260, 50, 10, 300}, {390, 50, 10, 300}}; // Vertical
-    
-    void windowLoop(){
-      int x, y;
-      int done = 0;
-      SDL_Event event;
-      while(!done){
-        
-        while(SDL_PollEvent(&event)){
-          switch(event.type){
-            case SDL_WINDOWEVENT_CLOSE:
-              {
-                if (window){
-                  SDL_DestroyWindow(window);
-                  window = NULL;}
+protected:
+  std::array<int, 10> variables = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+  std::array<int, 10> hist = variables;
+  char plays[10] = "         ";
+  char XO[3] = "OX";
+  char winner;
+  unsigned vez = 0, pos;
+
+  SDL_Rect button[10] = {
+      {170, 50, 75, 75}, {280, 50, 85, 75}, {410, 50, 75, 75},
+      {170, 170, 75, 75}, {280, 170, 85, 75}, {410, 170, 75, 75},
+      {170, 290, 75, 75}, {280, 290, 85, 75}, {410, 290, 75, 75}
+  };
+
+  SDL_Rect table_rects[4] = {
+      {170, 140, 320, 10}, {170, 260, 320, 10}, // Horizontal
+      {260, 50, 10, 300}, {390, 50, 10, 300}    // Vertical
+  };
+
+public:
+  Game(SDL_Window* _window) : window(_window), renderer(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)) {
+    TTF_Init();
+    font = TTF_OpenFont("fonts/arial.ttf", 24);
+  }
+
+  ~Game() {
+    TTF_Quit();
+    SDL_DestroyRenderer(renderer);
+  }
+
+  void startGame() {
+    int x, y;
+    int done = 0;
+    SDL_Event event;
+    while (!done) {
+      while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+          case SDL_WINDOWEVENT_CLOSE:
+            if (window) {
+              SDL_DestroyWindow(window);
+              window = nullptr;
+            }
+            break;
+            case SDL_QUIT:
+              done = 1;
+              break;
+            case SDL_MOUSEBUTTONDOWN:
+              SDL_GetMouseState(&x, &y);
+              for (int i = 0; i < 9; i++) {
+                if ((regionMatch(&button[i], x, y)) && variables[i] == 0) {
+                  variables[i]++;
+                  vez++;
+                  hist[vez] = i;
+                  pos = i;
+                  plays[pos] = XO[vez % 2];
+                }
               }
               break;
-        case SDL_QUIT:
-            done = 1;
-          break;
-        case SDL_MOUSEBUTTONDOWN:
-            SDL_GetMouseState(&x, &y);
-            for (int i=0;i<9;i++)
-              if ((regionMatch(&button[i], x, y)) && variables[i] == 0){
-                variables[i]++;
-                vez++;
-                hist[vez]=i;
-                pos = i;
-                plays[pos] = XO[vez%2];
-              }
-          break;
-          }
         }
+      }
       gameUI();
-
-      if (verifyVictory()){
+      if (verifyVictory()) {
         gameUI();
         SDL_Delay(3000);
         break;
       }
     }
+    if (window) {
       SDL_DestroyWindow(window);
-      SDL_DestroyRenderer(renderer);
+      window = nullptr;
+    }
+  }
+
+private:
+    int regionMatch(const SDL_Rect* rect, int x, int y) {
+      return (x >= rect->x) && (x <= rect->x + rect->w) && (y >= rect->y) && (y <= rect->y + rect->h);
     }
 
     void gameUI(){
@@ -143,22 +155,26 @@ class Game{
           return 0;
       return 2;
     }
-
-    static int regionMatch(const SDL_Rect *rect, int x, int y){
-      return ((x>=rect->x) && (x <= rect->x + rect->w) && (y >= rect->y ) && (y <= rect->y + rect->h));
-    }
-
-  public:
-    Game(SDL_Window *Window){
-      window = Window;
-      renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-  }
-    void startGame(){
-      windowLoop();
-}
 };
 
-int main (){
-  Game jogo = Game(SDL_CreateWindow("Tic-Tac-Toe", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, 0)); 
-  jogo.startGame();
+class StartGame : public Game {
+public:
+    StartGame(SDL_Window* _window): Game(_window) {}
+    void run() {
+      startGame();
+    }
+};
+
+int main() {
+  SDL_Init(SDL_INIT_VIDEO);
+  IMG_Init(IMG_INIT_PNG);
+
+  SDL_Window* window = SDL_CreateWindow("Tic-Tac-Toe", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, 0);
+  StartGame jogo(window);
+  jogo.run();
+
+  IMG_Quit();
+  SDL_Quit();
+
+  return 0;
 }
