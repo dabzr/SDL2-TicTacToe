@@ -9,11 +9,12 @@
 #include <SDL2/SDL_image.h>
 #include <iostream>
 #include <cstdlib>
+#include <array>
 
 class Game{
   private:
-    int variables[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-    int hist[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+    std::array <int, 10> variables = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+    std::array <int, 10>hist = variables;
     char plays[10] = "         ";
     char XO[3] = "OX";
     char winner;
