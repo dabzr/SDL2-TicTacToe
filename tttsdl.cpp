@@ -34,30 +34,48 @@ class Game{
     SDL_Rect table_rects[4]= {
     {170, 140, 320, 10}, {170, 260, 320, 10} // Horizontal
   , {260, 50, 10, 300}, {390, 50, 10, 300}}; // Vertical
-
-    int verifyVictory() {
-      int winCombinations[8][3] = {
-        {0, 1, 2}, {3, 4, 5}, {6, 7, 8},  // Horizontal
-        {0, 3, 6}, {1, 4, 7}, {2, 5, 8},  // Vertical
-        {0, 4, 8}, {2, 4, 6}              // Diagonal
-        };
-      int a, b, c;
-      for (int i = 0; i < 8; i++) {
-        a = winCombinations[i][0];
-        b = winCombinations[i][1];
-        c = winCombinations[i][2];
-
-        if (plays[a] != ' ' && plays[a] == plays[b] && plays[b] == plays[c]) {
-          winner = plays[a];
-          return 1;
+    
+    void windowLoop(){
+      int x, y;
+      int done = 0;
+      SDL_Event event;
+      while(!done){
+        
+        while(SDL_PollEvent(&event)){
+          switch(event.type){
+            case SDL_WINDOWEVENT_CLOSE:
+              {
+                if (window){
+                  SDL_DestroyWindow(window);
+                  window = NULL;}
+              }
+              break;
+        case SDL_QUIT:
+            done = 1;
+          break;
+        case SDL_MOUSEBUTTONDOWN:
+            SDL_GetMouseState(&x, &y);
+            for (int i=0;i<9;i++)
+              if ((regionMatch(&button[i], x, y)) && variables[i] == 0){
+                variables[i]++;
+                vez++;
+                hist[vez]=i;
+                pos = i;
+                plays[pos] = XO[vez%2];
+              }
+          break;
+          }
         }
+      gameUI();
+
+      if (verifyVictory()){
+        gameUI();
+        SDL_Delay(3000);
+        break;
       }
-
-      for (int i = 0; i < 9; i++)
-        if (plays[i] == ' ')
-          return 0;
-
-      return 2;
+    }
+      SDL_DestroyWindow(window);
+      SDL_DestroyRenderer(renderer);
     }
 
     void gameUI(){
@@ -102,54 +120,33 @@ class Game{
       SDL_RenderPresent(renderer);
     }
 
+    const int verifyVictory() {
+      int winCombinations[8][3] = {
+        {0, 1, 2}, {3, 4, 5}, {6, 7, 8},  // Horizontal
+        {0, 3, 6}, {1, 4, 7}, {2, 5, 8},  // Vertical
+        {0, 4, 8}, {2, 4, 6}              // Diagonal
+        };
+      int a, b, c;
+      for (int i = 0; i < 8; i++) {
+        a = winCombinations[i][0];
+        b = winCombinations[i][1];
+        c = winCombinations[i][2];
+
+        if (plays[a] != ' ' && plays[a] == plays[b] && plays[b] == plays[c]) {
+          winner = plays[a];
+          return 1;
+        }
+      }
+      for (int i = 0; i < 9; i++)
+        if (plays[i] == ' ')
+          return 0;
+      return 2;
+    }
+
     static int regionMatch(const SDL_Rect *rect, int x, int y){
       return ((x>=rect->x) && (x <= rect->x + rect->w) && (y >= rect->y ) && (y <= rect->y + rect->h));
     }
 
-    void windowLoop(){
-      int x, y;
-      int done = 0;
-      SDL_Event event;
-      while(!done){
-        
-        while(SDL_PollEvent(&event)){
-          switch(event.type){
-            case SDL_WINDOWEVENT_CLOSE:
-              {
-                if (window){
-                  SDL_DestroyWindow(window);
-                  window = NULL;}
-              }
-              break;
-        case SDL_QUIT:
-            done = 1;
-          break;
-        case SDL_MOUSEBUTTONDOWN:
-            SDL_GetMouseState(&x, &y);
-              
-            for (int i=0;i<9;i++){
-              if ((regionMatch(&button[i], x, y)) && variables[i] == 0){
-                variables[i]++;
-                vez++;
-                hist[vez]=i;
-                pos = i;
-                plays[pos] = XO[vez%2];
-              }
-            }
-          break;
-          }
-        }
-      gameUI();
-
-      if (verifyVictory()){
-        gameUI();
-        SDL_Delay(3000);
-        break;
-      }
-      }
-      SDL_DestroyWindow(window);
-      SDL_DestroyRenderer(renderer);
-    }
   public:
     Game(SDL_Window *Window){
       window = Window;
