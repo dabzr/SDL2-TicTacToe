@@ -1,5 +1,5 @@
-# SDL2-TicTacToe-C
-Tic-Tac-Toe Game made in C using SDL2, SDL2_Image and SDL2_TTF.
+# SDL2-TicTacToe
+Tic-Tac-Toe Game made in C++ using SDL2, SDL2_Image and SDL2_TTF.
 
 
 Example of use of the game:
