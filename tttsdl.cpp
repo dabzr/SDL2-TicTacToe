@@ -5,15 +5,13 @@
 #include <array>
 
 class Game {
-private:
+protected:
   SDL_Window* window;
   SDL_Renderer* renderer;
   SDL_Texture* texture[10];
   TTF_Font* font;
   SDL_Color white = {255, 255, 255, 255};
   SDL_Color black = {1, 1, 1, 1};
-
-protected:
   std::array<int, 10> variables = {0, 0, 0, 0, 0, 0, 0, 0, 0};
   std::array<int, 10> hist = variables;
   char plays[10] = "         ";
@@ -32,6 +30,33 @@ protected:
       {260, 50, 10, 300}, {390, 50, 10, 300}    // Vertical
   };
 
+  int regionMatch(const SDL_Rect* rect, int x, int y) {
+    return (x >= rect->x) && (x <= rect->x + rect->w) && (y >= rect->y) && (y <= rect->y + rect->h);
+  }
+
+  const int verifyVictory() {
+    int winCombinations[8][3] = {
+      {0, 1, 2}, {3, 4, 5}, {6, 7, 8},  // Horizontal
+      {0, 3, 6}, {1, 4, 7}, {2, 5, 8},  // Vertical
+      {0, 4, 8}, {2, 4, 6}              // Diagonal
+      };
+    int a, b, c;
+    for (int i = 0; i < 8; i++) {
+      a = winCombinations[i][0];
+      b = winCombinations[i][1];
+      c = winCombinations[i][2];
+
+      if (plays[a] != ' ' && plays[a] == plays[b] && plays[b] == plays[c]) {
+        winner = plays[a];
+        return 1;
+      }
+    }
+    for (int i = 0; i < 9; i++)
+      if (plays[i] == ' ')
+        return 0;
+    return 2;
+  }
+
 public:
   Game(SDL_Window* _window) : window(_window), renderer(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)) {
     TTF_Init();
@@ -43,54 +68,14 @@ public:
     SDL_DestroyRenderer(renderer);
   }
 
-  void startGame() {
-    int x, y;
-    int done = 0;
-    SDL_Event event;
-    while (!done) {
-      while (SDL_PollEvent(&event)) {
-        switch (event.type) {
-          case SDL_WINDOWEVENT_CLOSE:
-            if (window) {
-              SDL_DestroyWindow(window);
-              window = nullptr;
-            }
-            break;
-            case SDL_QUIT:
-              done = 1;
-              break;
-            case SDL_MOUSEBUTTONDOWN:
-              SDL_GetMouseState(&x, &y);
-              for (int i = 0; i < 9; i++) {
-                if ((regionMatch(&button[i], x, y)) && variables[i] == 0) {
-                  variables[i]++;
-                  vez++;
-                  hist[vez] = i;
-                  pos = i;
-                  plays[pos] = XO[vez % 2];
-                }
-              }
-              break;
-        }
-      }
-      gameUI();
-      if (verifyVictory()) {
-        gameUI();
-        SDL_Delay(3000);
-        break;
-      }
-    }
-    if (window) {
-      SDL_DestroyWindow(window);
-      window = nullptr;
-    }
+};
+
+class Graphics : public Game{
+  public:
+    Graphics(SDL_Window *window):Game(window){
+
   }
-
-private:
-    int regionMatch(const SDL_Rect* rect, int x, int y) {
-      return (x >= rect->x) && (x <= rect->x + rect->w) && (y >= rect->y) && (y <= rect->y + rect->h);
-    }
-
+  protected:
     void gameUI(){
       SDL_SetRenderDrawColor(renderer, black.r, black.g, black.b, black.a);
       SDL_RenderClear(renderer);
@@ -133,36 +118,54 @@ private:
       SDL_RenderPresent(renderer);
     }
 
-    const int verifyVictory() {
-      int winCombinations[8][3] = {
-        {0, 1, 2}, {3, 4, 5}, {6, 7, 8},  // Horizontal
-        {0, 3, 6}, {1, 4, 7}, {2, 5, 8},  // Vertical
-        {0, 4, 8}, {2, 4, 6}              // Diagonal
-        };
-      int a, b, c;
-      for (int i = 0; i < 8; i++) {
-        a = winCombinations[i][0];
-        b = winCombinations[i][1];
-        c = winCombinations[i][2];
 
-        if (plays[a] != ' ' && plays[a] == plays[b] && plays[b] == plays[c]) {
-          winner = plays[a];
-          return 1;
-        }
-      }
-      for (int i = 0; i < 9; i++)
-        if (plays[i] == ' ')
-          return 0;
-      return 2;
-    }
 };
 
-class StartGame : public Game {
+class StartGame : public Graphics {
 public:
-    StartGame(SDL_Window* _window): Game(_window) {}
-    void run() {
-      startGame();
+    StartGame(SDL_Window* _window): Graphics(_window) {}
+    void startGame() {
+      int x, y;
+      int done = 0;
+      SDL_Event event;
+      while (!done) {
+        while (SDL_PollEvent(&event)) {
+          switch (event.type) {
+            case SDL_WINDOWEVENT_CLOSE:
+              if (window) {
+                SDL_DestroyWindow(window);
+                window = nullptr;
+              }
+              break;
+              case SDL_QUIT:
+                done = 1;
+                break;
+              case SDL_MOUSEBUTTONDOWN:
+                SDL_GetMouseState(&x, &y);
+                for (int i = 0; i < 9; i++) {
+                  if ((regionMatch(&button[i], x, y)) && variables[i] == 0) {
+                    variables[i]++;
+                    vez++;
+                    hist[vez] = i;
+                    pos = i;
+                    plays[pos] = XO[vez % 2];
+                  }
+                }
+                break;
+          }
+        }
+        gameUI();
+        if (verifyVictory()) {
+          gameUI();
+          SDL_Delay(3000);
+          break;
+        }
+      }
+      if (window) {
+        SDL_DestroyWindow(window);
+        window = nullptr;
     }
+  }
 };
 
 int main() {
@@ -171,7 +174,7 @@ int main() {
 
   SDL_Window* window = SDL_CreateWindow("Tic-Tac-Toe", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, 0);
   StartGame jogo(window);
-  jogo.run();
+  jogo.startGame();
 
   IMG_Quit();
   SDL_Quit();
