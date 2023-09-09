@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_render.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
 #include <iostream>
@@ -10,10 +11,13 @@ protected:
   SDL_Renderer* renderer;
   SDL_Texture* texture[10];
   TTF_Font* font;
+
   SDL_Color white = {255, 255, 255, 255};
   SDL_Color black = {1, 1, 1, 1};
+
   std::array<int, 10> variables = {0, 0, 0, 0, 0, 0, 0, 0, 0};
   std::array<int, 10> hist = variables;
+
   char plays[10] = "         ";
   char XO[3] = "OX";
   char winner;
@@ -62,20 +66,17 @@ public:
     TTF_Init();
     font = TTF_OpenFont("fonts/arial.ttf", 24);
   }
-
   ~Game() {
     TTF_Quit();
     SDL_DestroyRenderer(renderer);
   }
-
 };
 
 class Graphics : public Game{
   public:
-    Graphics(SDL_Window *window):Game(window){
-
-  }
+    Graphics(SDL_Window *window):Game(window){}
   protected:
+    int notwon = 1;
     void gameUI(){
       SDL_SetRenderDrawColor(renderer, black.r, black.g, black.b, black.a);
       SDL_RenderClear(renderer);
@@ -84,7 +85,6 @@ class Graphics : public Game{
       SDL_RenderFillRect(renderer, &table_rects[1]);
       SDL_RenderFillRect(renderer, &table_rects[2]);
       SDL_RenderFillRect(renderer, &table_rects[3]);
-
       if (vez){
         SDL_Surface* surface;
         if (!(vez%2)) surface = IMG_Load("png/O.png");
@@ -113,18 +113,16 @@ class Graphics : public Game{
         SDL_RenderCopy(renderer, tmpTex, NULL, &textRect);
         SDL_FreeSurface(tmp);
         SDL_DestroyTexture(tmpTex);
-        TTF_Quit();
+        notwon = 0;
       }
       SDL_RenderPresent(renderer);
     }
-
-
 };
-
 class StartGame : public Graphics {
 public:
     StartGame(SDL_Window* _window): Graphics(_window) {}
     void startGame() {
+      int running = 1;
       int x, y;
       int done = 0;
       SDL_Event event;
@@ -152,19 +150,25 @@ public:
                   }
                 }
                 break;
+          case SDL_KEYDOWN:
+            switch(event.key.keysym.sym){
+              case SDLK_ESCAPE:
+              done = 1;
+              break;
+            }
           }
         }
-        gameUI();
-        if (verifyVictory()) {
-          gameUI();
-          SDL_Delay(3000);
-          break;
+          if (notwon==1)
+            gameUI();
+          if (!notwon){
+            SDL_RenderPresent(renderer);
+            notwon=2;
         }
       }
-      if (window) {
-        SDL_DestroyWindow(window);
-        window = nullptr;
-    }
+      if(verifyVictory())
+        TTF_Quit();
+      SDL_DestroyWindow(window);
+      window = nullptr;
   }
 };
 
