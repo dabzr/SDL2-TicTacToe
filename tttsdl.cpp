@@ -106,7 +106,7 @@ class Graphics : public Game{
         char text[25];
         std::sprintf(text, "Player %c is the Winner", winner);
         if (verifyVictory() == 2)
-          std::sprintf(text, "Draw!");
+          std::sprintf(text, "The players tied!");
         SDL_Surface *tmp = TTF_RenderText_Blended(font, text, white); 
         SDL_Texture *tmpTex = SDL_CreateTextureFromSurface(renderer, tmp);
         SDL_Rect textRect = {200, 400, tmp->w, tmp->h};
