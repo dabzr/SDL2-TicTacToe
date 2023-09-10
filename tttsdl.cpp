@@ -9,11 +9,6 @@ class Game {
 protected:
   SDL_Window* window;
   SDL_Renderer* renderer;
-  SDL_Texture* texture[10];
-  TTF_Font* font;
-
-  SDL_Color white = {255, 255, 255, 255};
-  SDL_Color black = {1, 1, 1, 1};
 
   std::array<int, 10> variables = {0, 0, 0, 0, 0, 0, 0, 0, 0};
   std::array<int, 10> hist = variables;
@@ -62,10 +57,7 @@ protected:
   }
 
 public:
-  Game(SDL_Window* _window) : window(_window), renderer(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)) {
-    TTF_Init();
-    font = TTF_OpenFont("fonts/arial.ttf", 24);
-  }
+  Game(SDL_Window* _window) : window(_window), renderer(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)) {}
   ~Game() {
     TTF_Quit();
     SDL_DestroyRenderer(renderer);
@@ -74,16 +66,22 @@ public:
 
 class Graphics : public Game{
   public:
-    Graphics(SDL_Window *window):Game(window){}
-  protected:
-    int notwon = 1;
+    Graphics(SDL_Window *window):Game(window){
+      TTF_Init();
+      font = TTF_OpenFont("fonts/arial.ttf", 24);
+  }
+  protected:   
+    SDL_Texture* texture[10];
+    TTF_Font* font;
+    SDL_Color white = {255, 255, 255, 255};
+    SDL_Color black = {1, 1, 1, 1};
+
     void gameUI(){
       SDL_SetRenderDrawColor(renderer, black.r, black.g, black.b, black.a);
       SDL_RenderClear(renderer);
       SDL_SetRenderDrawColor(renderer, white.r, white.g, white.b, white.a);
-      for (int i = 0; i < 4; i++){
-      SDL_RenderFillRect(renderer, &table_rects[i]);
-    }
+      for (int i = 0; i < 4; i++)
+        SDL_RenderFillRect(renderer, &table_rects[i]);
       if (vez){
         SDL_Surface* surface;
         if (!(vez%2)) surface = IMG_Load("png/O.png");
