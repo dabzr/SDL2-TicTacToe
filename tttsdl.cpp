@@ -113,7 +113,6 @@ class Graphics : public Game{
         SDL_RenderCopy(renderer, tmpTex, NULL, &textRect);
         SDL_FreeSurface(tmp);
         SDL_DestroyTexture(tmpTex);
-        notwon = 0;
       }
       SDL_RenderPresent(renderer);
     }
@@ -122,7 +121,6 @@ class StartGame : public Graphics {
 public:
     StartGame(SDL_Window* _window): Graphics(_window) {}
     void startGame() {
-      int running = 1;
       int x, y;
       int done = 0;
       SDL_Event event;
@@ -148,7 +146,6 @@ public:
                     hist[vez] = i;
                     pos = i;
                     plays[pos] = XO[vez % 2];
-                    running = 0;
                     gameUI();
                   }
                 }
