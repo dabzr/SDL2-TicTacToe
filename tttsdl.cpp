@@ -81,10 +81,9 @@ class Graphics : public Game{
       SDL_SetRenderDrawColor(renderer, black.r, black.g, black.b, black.a);
       SDL_RenderClear(renderer);
       SDL_SetRenderDrawColor(renderer, white.r, white.g, white.b, white.a);
-      SDL_RenderFillRect(renderer, &table_rects[0]);
-      SDL_RenderFillRect(renderer, &table_rects[1]);
-      SDL_RenderFillRect(renderer, &table_rects[2]);
-      SDL_RenderFillRect(renderer, &table_rects[3]);
+      for (int i = 0; i < 4; i++){
+      SDL_RenderFillRect(renderer, &table_rects[i]);
+    }
       if (vez){
         SDL_Surface* surface;
         if (!(vez%2)) surface = IMG_Load("png/O.png");
