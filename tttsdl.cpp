@@ -126,6 +126,7 @@ public:
       int x, y;
       int done = 0;
       SDL_Event event;
+      gameUI();
       while (!done) {
         while (SDL_PollEvent(&event)) {
           switch (event.type) {
@@ -147,6 +148,8 @@ public:
                     hist[vez] = i;
                     pos = i;
                     plays[pos] = XO[vez % 2];
+                    running = 0;
+                    gameUI();
                   }
                 }
                 break;
@@ -157,12 +160,6 @@ public:
               break;
             }
           }
-        }
-          if (notwon==1)
-            gameUI();
-          if (!notwon){
-            SDL_RenderPresent(renderer);
-            notwon=2;
         }
       }
       if(verifyVictory())
