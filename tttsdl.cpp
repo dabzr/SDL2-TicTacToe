@@ -6,6 +6,9 @@
 #include <array>
 
 class Game {
+public:
+  Game(SDL_Window* _window) : window(_window), renderer(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)) {}
+  
 protected:
   SDL_Window* window;
   SDL_Renderer* renderer;
@@ -56,12 +59,6 @@ protected:
     return 2;
   }
 
-public:
-  Game(SDL_Window* _window) : window(_window), renderer(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)) {}
-  ~Game() {
-    TTF_Quit();
-    SDL_DestroyRenderer(renderer);
-  }
 };
 
 class Graphics : public Game{
