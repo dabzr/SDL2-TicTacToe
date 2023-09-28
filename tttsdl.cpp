@@ -16,7 +16,7 @@ protected:
   std::array<int, 10> variables = {0, 0, 0, 0, 0, 0, 0, 0, 0};
   std::array<int, 10> hist = variables;
 
-  char plays[10] = "         ";
+  std::string plays = "         ";
   char XO[3] = "OX";
   char winner;
   unsigned vez = 0, pos;
@@ -80,9 +80,7 @@ class Graphics : public Game{
       for (int i = 0; i < 4; i++)
         SDL_RenderFillRect(renderer, &table_rects[i]);
       if (vez){
-        SDL_Surface* surface;
-        if (!(vez%2)) surface = IMG_Load("png/O.png");
-        else surface = IMG_Load("png/x.png");
+        SDL_Surface* surface = vez%2?IMG_Load("png/x.png"):IMG_Load("png/O.png");
         texture[vez] = SDL_CreateTextureFromSurface(renderer, surface);
         SDL_FreeSurface(surface);
         for (int i=0;i<9;i++)
@@ -156,7 +154,6 @@ public:
       if(verifyVictory())
         TTF_Quit();
       SDL_DestroyWindow(window);
-      window = nullptr;
   }
 };
 
